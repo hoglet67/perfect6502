@@ -50,7 +50,7 @@ int main() {
 
    // PAGE = &3B00
    ptr = 0x3B00;
-   memory[ptr++] = 0x0B;
+   memory[ptr++] = 0x0B; // 3B00 - 5 REM HELLO
    memory[ptr++] = 0x05;
    memory[ptr++] = 0x00;
    memory[ptr++] = 0xF4;
@@ -61,19 +61,19 @@ int main() {
    memory[ptr++] = 0x4c;
    memory[ptr++] = 0x4f;
    memory[ptr++] = 0x0d;
-   memory[ptr++] = 0x07;
+   memory[ptr++] = 0x07; // 3B0B - 10 PRINT PI
    memory[ptr++] = 0x0a;
    memory[ptr++] = 0x00;
    memory[ptr++] = 0xf1;
    memory[ptr++] = 0x20;
    memory[ptr++] = 0xaf;
    memory[ptr++] = 0x0d;
-   memory[ptr++] = 0x05;
+   memory[ptr++] = 0x05; // 3B12 - 20 END
    memory[ptr++] = 0x14;
    memory[ptr++] = 0x00;
    memory[ptr++] = 0xe0;
    memory[ptr++] = 0x0d;
-   memory[ptr++] = 0x00;
+   memory[ptr++] = 0x00; // 3B17 - END MARKER
    memory[ptr++] = 0xFF;
    memory[ptr++] = 0xFF;
 
@@ -122,16 +122,13 @@ int main() {
 
    char *commands[] = {
       "OLD\r",
-      "LIST\r",
-      "REN. 1,2\r",
-      "LIST\r",
-#if 0
       "PRINT \"Hello\"\r",
       "PRINT MID$(\"XX\"+\"XHE\"+\"LPXXX\",4,4)\r",
       "FOR I%=1 TO 3.7:PRINT I%:NEXT\r",
       "PRINT SIN(0.5)\r",
       "LIST\r",
       "REN. 1,2\r",
+      "LIST\r",
       "DIM P% 10:[NOP:RET\r",
       "LIST\r",
       "PRINT SQR(2)\r",
@@ -142,7 +139,6 @@ int main() {
       "PRINT PI\r",
       "PRINT 22/7\r",
       "RUN\r",
-#endif
    };
 
    int cmd = 0;
@@ -156,12 +152,11 @@ int main() {
       if (isFetchCycle(state, 0xfff1)) {
          if (cmd == sizeof(commands) / sizeof(char *)) {
             fprintf(stderr, "Run out of commands, exiting\n");
-            dump_memory();
+            //dump_memory();
             exit(0);
          }
          fprintf(stderr, "%s\n", commands[cmd]);
          strcpy((char *)memory + 0x3800, commands[cmd++]);
-         memory[0x3B00] = 0x07;
       }
 
       //if (cycle % 1000000 == 1) {
