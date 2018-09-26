@@ -8,7 +8,7 @@
 
 #include "z80basic.h"
 
-static void sigint_handler(int signo) {
+static void dump_memory() {
    int len = 0x10;
    for (int i = 0; i < 0x10000; i++) {
       if ((i % len) == 0) {
@@ -20,6 +20,10 @@ static void sigint_handler(int signo) {
       }
    }
    fprintf(stderr, "\n");
+}
+
+static void sigint_handler(int signo) {
+   dump_memory();
    exit(0);
 }
 
@@ -46,6 +50,17 @@ int main() {
 
    // PAGE = &3B00
    ptr = 0x3B00;
+   memory[ptr++] = 0x0B;
+   memory[ptr++] = 0x05;
+   memory[ptr++] = 0x00;
+   memory[ptr++] = 0xF4;
+   memory[ptr++] = 0x20;
+   memory[ptr++] = 0x48;
+   memory[ptr++] = 0x45;
+   memory[ptr++] = 0x4c;
+   memory[ptr++] = 0x4c;
+   memory[ptr++] = 0x4f;
+   memory[ptr++] = 0x0d;
    memory[ptr++] = 0x07;
    memory[ptr++] = 0x0a;
    memory[ptr++] = 0x00;
@@ -107,11 +122,14 @@ int main() {
 
    char *commands[] = {
       "OLD\r",
+      "LIST\r",
+      "REN. 1,2\r",
+      "LIST\r",
+#if 0
       "PRINT \"Hello\"\r",
       "PRINT MID$(\"XX\"+\"XHE\"+\"LPXXX\",4,4)\r",
       "FOR I%=1 TO 3.7:PRINT I%:NEXT\r",
       "PRINT SIN(0.5)\r",
-      "5 REM HELLO\r",
       "LIST\r",
       "REN. 1,2\r",
       "DIM P% 10:[NOP:RET\r",
@@ -124,6 +142,7 @@ int main() {
       "PRINT PI\r",
       "PRINT 22/7\r",
       "RUN\r",
+#endif
    };
 
    int cmd = 0;
@@ -137,6 +156,7 @@ int main() {
       if (isFetchCycle(state, 0xfff1)) {
          if (cmd == sizeof(commands) / sizeof(char *)) {
             fprintf(stderr, "Run out of commands, exiting\n");
+            dump_memory();
             exit(0);
          }
          fprintf(stderr, "%s\n", commands[cmd]);
