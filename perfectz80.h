@@ -30,3 +30,5 @@ extern unsigned char readDataBus(state_t *state);
 extern unsigned char memory[65536];
 extern unsigned int cycle;
 extern unsigned int transistors;
+
+extern int isFetchCycle(void *state, unsigned int addr);

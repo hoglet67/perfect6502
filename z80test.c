@@ -7,7 +7,6 @@
 
 int main() {
 
-   int clock = 0;
    int cycle = 0;
 
    void *state = initAndResetChip();
@@ -38,9 +37,6 @@ int main() {
       //  chipStatus(state);
       //}
 
-      clock = !clock;
       cycle++;
-
-      //if (!(cycle % 1000000)) printf("%d\n", cycle);
    };
 }

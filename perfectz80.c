@@ -289,6 +289,7 @@ mWrite(uint16_t a, uint8_t d)
 static inline void
 handleMemory(void *state)
 {
+   int m1 = isNodeHigh(state, _m1);
    int mreq = isNodeHigh(state, _mreq);
    int iorq = isNodeHigh(state, _iorq);
    int rd = isNodeHigh(state, _rd);
@@ -315,24 +316,34 @@ handleMemory(void *state)
       int a = readAddressBus(state) & 0xff;
       int d = readDataBus(state);
       if (a == 0xAA) {
+         // Spectrum Output
          if (d < 32) {
             if (d == 13) {
-               printf("\n");
+               fprintf(stderr, "\n");
             } else {
-               printf(".");
+               fprintf(stderr, ".");
             }
          } else if (d == 127) {
-            printf("©");
+            fprintf(stderr, "©");
          } else {
-            printf("%c", d);
+            fprintf(stderr, "%c", d);
          }
-         fflush(stdout);
+         fflush(stderr);
+      } else if (a == 0xab) {
+         // Acorn output
+         fprintf(stderr, "%c", d);
+         fflush(stderr);
       } else if (a == 0xfe) {
          // Mic??
       } else {
-         printf("IO Write: %02x=%02x\n", a, d);
+         fprintf(stderr, "IO Write: %02x=%02x\n", a, d);
       }
    }
+
+   // Output same for analysis with Z80Decoder
+   putchar(readDataBus(state));
+   putchar(m1 | (rd << 1) | (wr << 2) | (mreq << 3) | (iorq << 4) | 0xE0);
+
    last_wr = wr;
 }
 
@@ -393,6 +404,18 @@ initAndResetChip()
    cycle = 0;
 
    return state;
+}
+
+int isFetchCycle(void *state, unsigned int addr) {
+   static BOOL prev_condition = 0;
+   uint16_t a = readAddressBus(state);
+   BOOL m1    = isNodeHigh(state, _m1);
+   BOOL rd    = isNodeHigh(state, _rd);
+   BOOL mreq  = isNodeHigh(state, _mreq);
+   BOOL condition = !m1 && !mreq && !rd && (a == addr);
+   BOOL result = condition & !prev_condition;
+   prev_condition = condition;
+   return result;
 }
 
 /************************************************************
