@@ -18,7 +18,7 @@ cbmbasic: $(OBJS_6502)
 	$(CC) -o cbmbasic $(OBJS_6502)
 
 z80basic: $(OBJS_Z80_BASIC)
-	$(CC) -o z80basic $(OBJS_Z80_BASIC)
+	$(CC) -o z80basic $(OBJS_Z80_BASIC) -lreadline
 
 z80full: $(OBJS_Z80_FULL)
 	$(CC) -o z80full $(OBJS_Z80_FULL)

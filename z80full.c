@@ -1,15 +1,30 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <signal.h>
 #include <inttypes.h>
+#include <string.h>
 
 #include "perfectz80.h"
-
 #include "z80full.h"
 
-int main() {
+static void *state = NULL;
+
+static void sigint_handler(int signo) {
+   dump_memory();
+   shutdownChip(state);
+   exit(0);
+}
+
+int main(int argc, char *argv[]) {
 
    int cycle = 0;
 
-   void *state = initAndResetChip();
+   if (signal(SIGINT, sigint_handler) == SIG_ERR) {
+      fputs("An error occurred while setting a signal handler.\n", stderr);
+      return EXIT_FAILURE;
+   }
+
+   state = initAndResetChip(argc, argv);
 
    // On reset JP 0x8000
    memory[0] = 0xcd;

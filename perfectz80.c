@@ -21,6 +21,10 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
 #include "types.h"
 #include "netlist_sim.h"
 /* nodes & transistors */
@@ -31,6 +35,8 @@
  * Z80-specific Interfacing
  *
  ************************************************************/
+
+FILE *trace_file;
 
 uint16_t
 readAddressBus(void *state)
@@ -319,30 +325,32 @@ handleMemory(void *state)
          // Spectrum Output
          if (d < 32) {
             if (d == 13) {
-               fprintf(stderr, "\n");
+               printf("\n");
             } else {
-               fprintf(stderr, ".");
+               printf(".");
             }
          } else if (d == 127) {
-            fprintf(stderr, "©");
+            printf("©");
          } else {
-            fprintf(stderr, "%c", d);
+            printf("%c", d);
          }
-         fflush(stderr);
+         fflush(stdout);
       } else if (a == 0xab) {
          // Acorn output
-         fprintf(stderr, "%c", d);
-         fflush(stderr);
+         printf("%c", d);
+         fflush(stdout);
       } else if (a == 0xfe) {
          // Mic??
       } else {
-         fprintf(stderr, "IO Write: %02x=%02x\n", a, d);
+         printf("IO Write: %02x=%02x\n", a, d);
       }
    }
 
    // Output same for analysis with Z80Decoder
-   putchar(readDataBus(state));
-   putchar(m1 | (rd << 1) | (wr << 2) | (mreq << 3) | (iorq << 4) | 0xE0);
+   if (trace_file) {
+      putc(readDataBus(state), trace_file);
+      putc(m1 | (rd << 1) | (wr << 2) | (mreq << 3) | (iorq << 4) | 0xE0, trace_file);
+   }
 
    last_wr = wr;
 }
@@ -372,8 +380,33 @@ step(void *state)
 }
 
 void *
-initAndResetChip()
+initAndResetChip(int argc, char *argv[])
 {
+
+   /* Parse arguments */
+
+   trace_file = NULL;
+   int opt;
+
+   while ((opt = getopt(argc, argv, "t:")) != -1) {
+      switch (opt) {
+      case 't':
+         if (strcmp(optarg, "-") == 0) {
+            trace_file = stderr;
+         } else {
+            trace_file = fopen(optarg, "w");
+            if (trace_file == NULL) {
+               printf("Failed to open trace file %s for writing\n", optarg);
+               exit(EXIT_FAILURE);
+            }
+         }
+         break;
+      default:
+         printf("Usage: %s [-t trace_file]\n", argv[0]);
+         exit(EXIT_FAILURE);
+      }
+   }
+
    /* set up data structures for efficient emulation */
    nodenum_t nodes = sizeof(netlist_z80_node_is_pullup)/sizeof(*netlist_z80_node_is_pullup);
    nodenum_t transistors = sizeof(netlist_z80_transdefs)/sizeof(*netlist_z80_transdefs);
@@ -416,6 +449,12 @@ int isFetchCycle(void *state, unsigned int addr) {
    BOOL result = condition & !prev_condition;
    prev_condition = condition;
    return result;
+}
+
+void shutdownChip(state_t *state) {
+   if (trace_file) {
+      fflush(trace_file);
+   }
 }
 
 /************************************************************
@@ -472,5 +511,19 @@ chipStatus(void *state)
       printf(" IOW$%04X=$%02X", a, d);
    }
 
+   printf("\n");
+}
+
+void dump_memory() {
+   int len = 0x10;
+   for (int i = 0; i < 0x10000; i++) {
+      if ((i % len) == 0) {
+         printf("%04X :", i);
+      }
+      printf(" %02x", memory[i]);
+      if ((i % len) == len - 1) {
+         printf("\n");
+      }
+   }
    printf("\n");
 }

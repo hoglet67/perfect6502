@@ -3,31 +3,21 @@
 #include <signal.h>
 #include <inttypes.h>
 #include <string.h>
+#include <readline/readline.h>
 
 #include "perfectz80.h"
 
 #include "z80basic.h"
 
-static void dump_memory() {
-   int len = 0x10;
-   for (int i = 0; i < 0x10000; i++) {
-      if ((i % len) == 0) {
-         fprintf(stderr, "%04X :", i);
-      }
-      fprintf(stderr, " %02x", memory[i]);
-      if ((i % len) == len - 1) {
-         fprintf(stderr, "\n");
-      }
-   }
-   fprintf(stderr, "\n");
-}
+static void *state = NULL;
 
 static void sigint_handler(int signo) {
    dump_memory();
+   shutdownChip(state);
    exit(0);
 }
 
-int main() {
+int main(int argc, char *argv[]) {
 
    if (signal(SIGINT, sigint_handler) == SIG_ERR) {
       fputs("An error occurred while setting a signal handler.\n", stderr);
@@ -36,7 +26,7 @@ int main() {
 
    int cycle = 0;
 
-   void *state = initAndResetChip();
+   state = initAndResetChip(argc, argv);
 
    int ptr = 0;
 
@@ -120,29 +110,6 @@ int main() {
       memory[0x0100 + i] = z80basic_bin[i];
    }
 
-   char *commands[] = {
-      "OLD\r",
-      "PRINT \"Hello\"\r",
-      "PRINT MID$(\"XX\"+\"XHE\"+\"LPXXX\",4,4)\r",
-      "FOR I%=1 TO 3.7:PRINT I%:NEXT\r",
-      "PRINT SIN(0.5)\r",
-      "LIST\r",
-      "REN. 1,2\r",
-      "LIST\r",
-      "DIM P% 10:[NOP:RET\r",
-      "LIST\r",
-      "PRINT SQR(2)\r",
-      "PRINT LOG(2)\r",
-      "PRINT EXP(1)\r",
-      "PRINT ACS(0)*2\r",
-      "FOR I=1 TO 3:PRINT I:NEXT\r",
-      "PRINT PI\r",
-      "PRINT 22/7\r",
-      "RUN\r",
-   };
-
-   int cmd = 0;
-
    /* emulate the 6502! */
    for (;;) {
       step(state);
@@ -150,13 +117,17 @@ int main() {
       // OSWORD = &FFF1
       // INPUT BUFFER = &3800
       if (isFetchCycle(state, 0xfff1)) {
-         if (cmd == sizeof(commands) / sizeof(char *)) {
-            fprintf(stderr, "Run out of commands, exiting\n");
+         char *command = readline(NULL);
+         if (command == NULL) {
+            printf("Run out of commands, exiting\n");
             //dump_memory();
+            shutdownChip(state);
             exit(0);
          }
-         fprintf(stderr, "%s\n", commands[cmd]);
-         strcpy((char *)memory + 0x3800, commands[cmd++]);
+         // Copy the command to the input buffer
+         strcpy((char *)memory + 0x3800, command);
+         // Add a terminator
+         *(memory + 0x3800 + strlen(command)) = 13;
       }
 
       //if (cycle % 1000000 == 1) {

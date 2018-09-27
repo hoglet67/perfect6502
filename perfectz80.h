@@ -2,7 +2,8 @@
 #define state_t void
 #endif
 
-extern state_t *initAndResetChip();
+extern state_t *initAndResetChip(int argc, char *argv[]);
+extern void shutdownChip(state_t *state);
 extern void step(state_t *state);
 extern void chipStatus(state_t *state);
 extern unsigned short readPC(state_t *state);
@@ -32,3 +33,5 @@ extern unsigned int cycle;
 extern unsigned int transistors;
 
 extern int isFetchCycle(void *state, unsigned int addr);
+
+extern void dump_memory();
