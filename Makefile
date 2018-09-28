@@ -9,8 +9,10 @@ OBJS_Z80_DOC=$(OBJS_Z80) z80doc.o
 
 #OBJS+=measure.o
 
-CFLAGS=-Werror -Wall -O3
+#CFLAGS=-Werror -Wall -O3
 #CC=clang
+
+CFLAGS=-Wall -O3
 
 all: z80basic z80full z80doc cbmbasic
 
