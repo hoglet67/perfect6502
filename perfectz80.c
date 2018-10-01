@@ -314,7 +314,7 @@ handleMemory(void *state)
 
    // IO Read
    if (!iorq && !rd) {
-      writeDataBus(state, 0x00);
+      writeDataBus(state, 0xBF);
    }
 
    // IO Write (falling edge only)
