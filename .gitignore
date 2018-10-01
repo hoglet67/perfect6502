@@ -6,3 +6,6 @@
 # object files
 cbmbasic
 *.o
+not_in_git/
+*.bin
+*.log
