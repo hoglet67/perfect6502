@@ -40,8 +40,8 @@ int main(int argc, char *argv[]) {
    memory[0x1601] = 0xC9; // RET
 
    // Z80doc loaded to 0x8000
-   for (int i = 0; i < sizeof z80doc_bin; i++) {
-      memory[0x8000 + i] = z80doc_bin[i];
+   for (int i = 0; i < sizeof z80doc_out; i++) {
+      memory[0x8000 + i] = z80doc_out[i];
    }
 
    /* emulate the 6502! */
