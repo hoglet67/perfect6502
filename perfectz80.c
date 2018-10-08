@@ -417,6 +417,8 @@ initAndResetChip(int argc, char *argv[])
                                  vss,
                                  vcc);
 
+   modelChargeSharing(state, YES);
+
    setNode(state, _reset, 0);
    setNode(state, clk,    1);
    setNode(state, _busrq, 1);

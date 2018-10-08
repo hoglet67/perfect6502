@@ -10,3 +10,5 @@ void writeNodes(state_t *state, int count, nodenum_t *nodelist, int v);
 
 void recalcNodeList(state_t *state);
 void stabilizeChip(state_t *state);
+
+void modelChargeSharing(state_t *state, BOOL enabled);
