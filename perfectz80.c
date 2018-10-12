@@ -90,9 +90,9 @@ uint8_t
 readA(void *state)
 {
    if (!isNodeHigh(state, ex_af)) {
-      return 0xFF ^ readNodes(state, 8, (nodenum_t[]){ reg_aa0,reg_aa1,reg_aa2,reg_aa3,reg_aa4,reg_aa5,reg_aa6,reg_aa7 });
+      return readNodes(state, 8, (nodenum_t[]){ reg_aa0,reg_aa1,reg_aa2,reg_aa3,reg_aa4,reg_aa5,reg_aa6,reg_aa7 });
    } else {
-      return 0xFF ^ readNodes(state, 8, (nodenum_t[]){ reg_a0,reg_a1,reg_a2,reg_a3,reg_a4,reg_a5,reg_a6,reg_a7 });
+      return readNodes(state, 8, (nodenum_t[]){ reg_a0,reg_a1,reg_a2,reg_a3,reg_a4,reg_a5,reg_a6,reg_a7 });
    }
 }
 
@@ -100,9 +100,9 @@ uint8_t
 readF(void *state)
 {
    if (!isNodeHigh(state, ex_af)) {
-      return 0xFF ^ readNodes(state, 8, (nodenum_t[]){ reg_ff0,reg_ff1,reg_ff2,reg_ff3,reg_ff4,reg_ff5,reg_ff6,reg_ff7 });
+      return readNodes(state, 8, (nodenum_t[]){ reg_ff0,reg_ff1,reg_ff2,reg_ff3,reg_ff4,reg_ff5,reg_ff6,reg_ff7 });
    } else {
-      return 0xFF ^ readNodes(state, 8, (nodenum_t[]){ reg_f0,reg_f1,reg_f2,reg_f3,reg_f4,reg_f5,reg_f6,reg_f7 });
+      return readNodes(state, 8, (nodenum_t[]){ reg_f0,reg_f1,reg_f2,reg_f3,reg_f4,reg_f5,reg_f6,reg_f7 });
    }
 }
 
@@ -110,9 +110,9 @@ uint8_t
 readB(void *state)
 {
    if (isNodeHigh(state, ex_bcdehl)) {
-      return 0xFF ^ readNodes(state, 8, (nodenum_t[]){ reg_bb0,reg_bb1,reg_bb2,reg_bb3,reg_bb4,reg_bb5,reg_bb6,reg_bb7 });
+      return readNodes(state, 8, (nodenum_t[]){ reg_bb0,reg_bb1,reg_bb2,reg_bb3,reg_bb4,reg_bb5,reg_bb6,reg_bb7 });
    } else {
-      return 0xFF ^ readNodes(state, 8, (nodenum_t[]){ reg_b0,reg_b1,reg_b2,reg_b3,reg_b4,reg_b5,reg_b6,reg_b7 });
+      return readNodes(state, 8, (nodenum_t[]){ reg_b0,reg_b1,reg_b2,reg_b3,reg_b4,reg_b5,reg_b6,reg_b7 });
    }
 }
 
@@ -120,9 +120,9 @@ uint8_t
 readC(void *state)
 {
    if (isNodeHigh(state, ex_bcdehl)) {
-      return 0xFF ^ readNodes(state, 8, (nodenum_t[]){ reg_cc0,reg_cc1,reg_cc2,reg_cc3,reg_cc4,reg_cc5,reg_cc6,reg_cc7 });
+      return readNodes(state, 8, (nodenum_t[]){ reg_cc0,reg_cc1,reg_cc2,reg_cc3,reg_cc4,reg_cc5,reg_cc6,reg_cc7 });
    } else {
-      return 0xFF ^ readNodes(state, 8, (nodenum_t[]){ reg_c0,reg_c1,reg_c2,reg_c3,reg_c4,reg_c5,reg_c6,reg_c7 });
+      return readNodes(state, 8, (nodenum_t[]){ reg_c0,reg_c1,reg_c2,reg_c3,reg_c4,reg_c5,reg_c6,reg_c7 });
    }
 }
 
@@ -131,15 +131,15 @@ readD(void *state)
 {
    if (isNodeHigh(state, ex_bcdehl)) {
       if (isNodeHigh(state, ex_dehl1)) {
-         return 0xFF ^ readNodes(state, 8, (nodenum_t[]){ reg_hh0,reg_hh1,reg_hh2,reg_hh3,reg_hh4,reg_hh5,reg_hh6,reg_hh7 });
+         return readNodes(state, 8, (nodenum_t[]){ reg_hh0,reg_hh1,reg_hh2,reg_hh3,reg_hh4,reg_hh5,reg_hh6,reg_hh7 });
       } else {
-         return 0xFF ^ readNodes(state, 8, (nodenum_t[]){ reg_dd0,reg_dd1,reg_dd2,reg_dd3,reg_dd4,reg_dd5,reg_dd6,reg_dd7 });
+         return readNodes(state, 8, (nodenum_t[]){ reg_dd0,reg_dd1,reg_dd2,reg_dd3,reg_dd4,reg_dd5,reg_dd6,reg_dd7 });
       }
    } else {
       if (isNodeHigh(state, ex_dehl0)) {
-         return 0xFF ^ readNodes(state, 8, (nodenum_t[]){ reg_h0,reg_h1,reg_h2,reg_h3,reg_h4,reg_h5,reg_h6,reg_h7 });
+         return readNodes(state, 8, (nodenum_t[]){ reg_h0,reg_h1,reg_h2,reg_h3,reg_h4,reg_h5,reg_h6,reg_h7 });
       } else {
-         return 0xFF ^ readNodes(state, 8, (nodenum_t[]){ reg_d0,reg_d1,reg_d2,reg_d3,reg_d4,reg_d5,reg_d6,reg_d7 });
+         return readNodes(state, 8, (nodenum_t[]){ reg_d0,reg_d1,reg_d2,reg_d3,reg_d4,reg_d5,reg_d6,reg_d7 });
       }
    }
 }
@@ -149,15 +149,15 @@ readE(void *state)
 {
    if (isNodeHigh(state, ex_bcdehl)) {
       if (isNodeHigh(state, ex_dehl1)) {
-         return 0xFF ^ readNodes(state, 8, (nodenum_t[]){ reg_ll0,reg_ll1,reg_ll2,reg_ll3,reg_ll4,reg_ll5,reg_ll6,reg_ll7 });
+         return readNodes(state, 8, (nodenum_t[]){ reg_ll0,reg_ll1,reg_ll2,reg_ll3,reg_ll4,reg_ll5,reg_ll6,reg_ll7 });
       } else {
-         return 0xFF ^ readNodes(state, 8, (nodenum_t[]){ reg_ee0,reg_ee1,reg_ee2,reg_ee3,reg_ee4,reg_ee5,reg_ee6,reg_ee7 });
+         return readNodes(state, 8, (nodenum_t[]){ reg_ee0,reg_ee1,reg_ee2,reg_ee3,reg_ee4,reg_ee5,reg_ee6,reg_ee7 });
       }
    } else {
       if (isNodeHigh(state, ex_dehl0)) {
-         return 0xFF ^ readNodes(state, 8, (nodenum_t[]){ reg_l0,reg_l1,reg_l2,reg_l3,reg_l4,reg_l5,reg_l6,reg_l7 });
+         return readNodes(state, 8, (nodenum_t[]){ reg_l0,reg_l1,reg_l2,reg_l3,reg_l4,reg_l5,reg_l6,reg_l7 });
       } else {
-         return 0xFF ^ readNodes(state, 8, (nodenum_t[]){ reg_e0,reg_e1,reg_e2,reg_e3,reg_e4,reg_e5,reg_e6,reg_e7 });
+         return readNodes(state, 8, (nodenum_t[]){ reg_e0,reg_e1,reg_e2,reg_e3,reg_e4,reg_e5,reg_e6,reg_e7 });
       }
    }
 }
@@ -167,15 +167,15 @@ readH(void *state)
 {
    if (isNodeHigh(state, ex_bcdehl)) {
       if (isNodeHigh(state, ex_dehl1)) {
-         return 0xFF ^ readNodes(state, 8, (nodenum_t[]){ reg_dd0,reg_dd1,reg_dd2,reg_dd3,reg_dd4,reg_dd5,reg_dd6,reg_dd7 });
+         return readNodes(state, 8, (nodenum_t[]){ reg_dd0,reg_dd1,reg_dd2,reg_dd3,reg_dd4,reg_dd5,reg_dd6,reg_dd7 });
       } else {
-         return 0xFF ^ readNodes(state, 8, (nodenum_t[]){ reg_hh0,reg_hh1,reg_hh2,reg_hh3,reg_hh4,reg_hh5,reg_hh6,reg_hh7 });
+         return readNodes(state, 8, (nodenum_t[]){ reg_hh0,reg_hh1,reg_hh2,reg_hh3,reg_hh4,reg_hh5,reg_hh6,reg_hh7 });
       }
    } else {
       if (isNodeHigh(state, ex_dehl0)) {
-         return 0xFF ^ readNodes(state, 8, (nodenum_t[]){ reg_d0,reg_d1,reg_d2,reg_d3,reg_d4,reg_d5,reg_d6,reg_d7 });
+         return readNodes(state, 8, (nodenum_t[]){ reg_d0,reg_d1,reg_d2,reg_d3,reg_d4,reg_d5,reg_d6,reg_d7 });
       } else {
-         return 0xFF ^ readNodes(state, 8, (nodenum_t[]){ reg_h0,reg_h1,reg_h2,reg_h3,reg_h4,reg_h5,reg_h6,reg_h7 });
+         return readNodes(state, 8, (nodenum_t[]){ reg_h0,reg_h1,reg_h2,reg_h3,reg_h4,reg_h5,reg_h6,reg_h7 });
       }
    }
 }
@@ -185,15 +185,15 @@ readL(void *state)
 {
    if (isNodeHigh(state, ex_bcdehl)) {
       if (isNodeHigh(state, ex_dehl1)) {
-         return 0xFF ^ readNodes(state, 8, (nodenum_t[]){ reg_ee0,reg_ee1,reg_ee2,reg_ee3,reg_ee4,reg_ee5,reg_ee6,reg_ee7 });
+         return readNodes(state, 8, (nodenum_t[]){ reg_ee0,reg_ee1,reg_ee2,reg_ee3,reg_ee4,reg_ee5,reg_ee6,reg_ee7 });
       } else {
-         return 0xFF ^ readNodes(state, 8, (nodenum_t[]){ reg_ll0,reg_ll1,reg_ll2,reg_ll3,reg_ll4,reg_ll5,reg_ll6,reg_ll7 });
+         return readNodes(state, 8, (nodenum_t[]){ reg_ll0,reg_ll1,reg_ll2,reg_ll3,reg_ll4,reg_ll5,reg_ll6,reg_ll7 });
       }
    } else {
       if (isNodeHigh(state, ex_dehl0)) {
-         return 0xFF ^ readNodes(state, 8, (nodenum_t[]){ reg_e0,reg_e1,reg_e2,reg_e3,reg_e4,reg_e5,reg_e6,reg_e7 });
+         return readNodes(state, 8, (nodenum_t[]){ reg_e0,reg_e1,reg_e2,reg_e3,reg_e4,reg_e5,reg_e6,reg_e7 });
       } else {
-         return 0xFF ^ readNodes(state, 8, (nodenum_t[]){ reg_l0,reg_l1,reg_l2,reg_l3,reg_l4,reg_l5,reg_l6,reg_l7 });
+         return readNodes(state, 8, (nodenum_t[]){ reg_l0,reg_l1,reg_l2,reg_l3,reg_l4,reg_l5,reg_l6,reg_l7 });
       }
    }
 }
@@ -201,50 +201,50 @@ readL(void *state)
 uint8_t
 readIXL(void *state)
 {
-   return 0xFF ^ readNodes(state, 8, (nodenum_t[]){ reg_ixl0,reg_ixl1,reg_ixl2,reg_ixl3,reg_ixl4,reg_ixl5,reg_ixl6,reg_ixl7 });
+   return readNodes(state, 8, (nodenum_t[]){ reg_ixl0,reg_ixl1,reg_ixl2,reg_ixl3,reg_ixl4,reg_ixl5,reg_ixl6,reg_ixl7 });
 }
 
 uint8_t
 readIXH(void *state)
 {
-   return 0xFF ^ readNodes(state, 8, (nodenum_t[]){ reg_ixh0,reg_ixh1,reg_ixh2,reg_ixh3,reg_ixh4,reg_ixh5,reg_ixh6,reg_ixh7 });
+   return readNodes(state, 8, (nodenum_t[]){ reg_ixh0,reg_ixh1,reg_ixh2,reg_ixh3,reg_ixh4,reg_ixh5,reg_ixh6,reg_ixh7 });
 }
 
 
 uint8_t
 readIYL(void *state)
 {
-   return 0xFF ^ readNodes(state, 8, (nodenum_t[]){ reg_iyl0,reg_iyl1,reg_iyl2,reg_iyl3,reg_iyl4,reg_iyl5,reg_iyl6,reg_iyl7 });
+   return readNodes(state, 8, (nodenum_t[]){ reg_iyl0,reg_iyl1,reg_iyl2,reg_iyl3,reg_iyl4,reg_iyl5,reg_iyl6,reg_iyl7 });
 }
 
 uint8_t
 readIYH(void *state)
 {
-   return 0xFF ^ readNodes(state, 8, (nodenum_t[]){ reg_iyh0,reg_iyh1,reg_iyh2,reg_iyh3,reg_iyh4,reg_iyh5,reg_iyh6,reg_iyh7 });
+   return readNodes(state, 8, (nodenum_t[]){ reg_iyh0,reg_iyh1,reg_iyh2,reg_iyh3,reg_iyh4,reg_iyh5,reg_iyh6,reg_iyh7 });
 }
 
 uint8_t
 readSPL(void *state)
 {
-   return 0xFF ^ readNodes(state, 8, (nodenum_t[]){ reg_spl0,reg_spl1,reg_spl2,reg_spl3,reg_spl4,reg_spl5,reg_spl6,reg_spl7 });
+   return readNodes(state, 8, (nodenum_t[]){ reg_spl0,reg_spl1,reg_spl2,reg_spl3,reg_spl4,reg_spl5,reg_spl6,reg_spl7 });
 }
 
 uint8_t
 readSPH(void *state)
 {
-   return 0xFF ^ readNodes(state, 8, (nodenum_t[]){ reg_sph0,reg_sph1,reg_sph2,reg_sph3,reg_sph4,reg_sph5,reg_sph6,reg_sph7 });
+   return readNodes(state, 8, (nodenum_t[]){ reg_sph0,reg_sph1,reg_sph2,reg_sph3,reg_sph4,reg_sph5,reg_sph6,reg_sph7 });
 }
 
 uint8_t
 readPCL(void *state)
 {
-   return 0xFF ^ readNodes(state, 8, (nodenum_t[]){ reg_pcl0,reg_pcl1,reg_pcl2,reg_pcl3,reg_pcl4,reg_pcl5,reg_pcl6,reg_pcl7 });
+   return readNodes(state, 8, (nodenum_t[]){ reg_pcl0,reg_pcl1,reg_pcl2,reg_pcl3,reg_pcl4,reg_pcl5,reg_pcl6,reg_pcl7 });
 }
 
 uint8_t
 readPCH(void *state)
 {
-   return 0xFF ^ readNodes(state, 8, (nodenum_t[]){ reg_pch0,reg_pch1,reg_pch2,reg_pch3,reg_pch4,reg_pch5,reg_pch6,reg_pch7 });
+   return readNodes(state, 8, (nodenum_t[]){ reg_pch0,reg_pch1,reg_pch2,reg_pch3,reg_pch4,reg_pch5,reg_pch6,reg_pch7 });
 }
 
 
