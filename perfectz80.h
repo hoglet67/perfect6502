@@ -3,6 +3,7 @@
 #endif
 
 extern state_t *initAndResetChip(int argc, char *argv[]);
+extern void setInt(state_t *state, int value);
 extern void shutdownChip(state_t *state);
 extern void step(state_t *state);
 extern void chipStatus(state_t *state);
@@ -35,3 +36,5 @@ extern unsigned int transistors;
 extern int isFetchCycle(void *state, unsigned int addr);
 
 extern void dump_memory();
+extern void dump_node_state(state_t *state, int tag);
+extern void dump_transistor_state(state_t *state, int tag);

@@ -346,6 +346,11 @@ handleMemory(void *state)
       }
    }
 
+   // Interrupt Ack
+   if (!iorq && !m1) {
+      writeDataBus(state, 0xE9);
+   }
+
    // Output same for analysis with Z80Decoder
    if (trace_file) {
       putc(readDataBus(state), trace_file);
@@ -441,6 +446,10 @@ initAndResetChip(int argc, char *argv[])
    return state;
 }
 
+void setInt(state_t *state, int value) {
+   setNode(state, _int,  value);
+}
+
 int isFetchCycle(void *state, unsigned int addr) {
    static BOOL prev_condition = 0;
    uint16_t a = readAddressBus(state);
@@ -528,4 +537,24 @@ void dump_memory() {
       }
    }
    printf("\n");
+}
+
+void dump_node_state(state_t *state, int tag) {
+   for (int i = 0; i < getNumNodes(state); i++) {
+      if (tag >= 0) {
+         printf("## %d = %d (%04x)\n", i, isNodeHigh(state, i), tag);
+      } else {
+         printf("## %d = %d\n", i, isNodeHigh(state, i));
+      }
+   }
+}
+
+void dump_transistor_state(state_t *state, int tag) {
+   for (int i = 0; i < getNumTransistors(state); i++) {
+      if (tag >= 0) {
+         printf("## %d = %d (%04x)\n", 2063 + i, isTransistorOn(state, i), tag);
+      } else {
+         printf("## %d = %d\n", i, isTransistorOn(state, i));
+      }
+   }
 }

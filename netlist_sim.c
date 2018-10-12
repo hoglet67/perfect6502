@@ -32,8 +32,8 @@
 #include "types.h"
 
 /* the smallest types to fit the numbers */
-typedef uint16_t transnum_t;
 typedef uint16_t count_t;
+/* transnum_t is declared in types.h, because it's API */
 /* nodenum_t is declared in types.h, because it's API */
 
 /************************************************************
@@ -687,4 +687,20 @@ writeNodes(state_t *state, int count, nodenum_t *nodelist, int v)
 {
 	for (int i = 0; i < 8; i++, v >>= 1)
 	setNode(state, nodelist[i], v & 1);
+}
+
+int getNumNodes(state_t *state) {
+   return state->nodes;
+}
+
+int getNumTransistors(state_t *state) {
+   return state->transistors;
+}
+
+BOOL isTransistorOn(state_t *state, transnum_t tn) {
+   return get_transistors_on(state, tn);
+}
+
+void setTransistorOn(state_t *state, transnum_t tn, BOOL on) {
+   return set_transistors_on(state, tn, on);
 }

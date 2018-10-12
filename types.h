@@ -5,6 +5,7 @@ typedef unsigned char uint8_t;
 typedef unsigned short uint16_t;
 typedef unsigned int BOOL;
 typedef uint16_t nodenum_t;
+typedef uint16_t transnum_t;
 
 typedef struct {
 	int gate;
