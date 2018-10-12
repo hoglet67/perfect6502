@@ -9,3 +9,7 @@ cbmbasic
 not_in_git/
 *.bin
 *.log
+z80basic
+z80full
+z80doc
+z80interrupt
