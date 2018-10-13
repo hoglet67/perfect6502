@@ -66,6 +66,7 @@ typedef struct {
 	nodenum_t transistors;
 	nodenum_t vss;
 	nodenum_t vcc;
+	nodenum_t trap;
 
 	/* everything that describes a node */
 	bitmap_t *nodes_pullup;
@@ -205,6 +206,9 @@ get_nodes_value(state_t *state, transnum_t t)
 static inline void
 set_transistors_on(state_t *state, transnum_t t, BOOL s)
 {
+   if (t == state->trap) {
+      s = 1;
+   }
 	set_bitmap(state->transistors_on, t, s);
 }
 
@@ -510,6 +514,10 @@ add_nodes_left_dependant(state_t *state, nodenum_t a, nodenum_t b)
 	state->nodes_left_dependant[a][state->nodes_left_dependants[a]++] = b;
 }
 
+void setTrap(state_t *state, transnum_t tn) {
+   state->trap = tn;
+}
+
 state_t *
 setupNodesAndTransistors(netlist_transdefs *transdefs, BOOL *node_is_pullup, nodenum_t nodes, nodenum_t transistors, nodenum_t vss, nodenum_t vcc)
 {
@@ -518,6 +526,7 @@ setupNodesAndTransistors(netlist_transdefs *transdefs, BOOL *node_is_pullup, nod
 	state->chargeSharing = NO;
 	state->nodes = nodes;
 	state->transistors = transistors;
+	state->trap = 0xFFFF;
 	state->vss = vss;
 	state->vcc = vcc;
 	state->nodes_pullup = calloc(WORDS_FOR_BITS(state->nodes), sizeof(*state->nodes_pullup));

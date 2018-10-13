@@ -392,8 +392,9 @@ initAndResetChip(int argc, char *argv[])
 
    trace_file = NULL;
    int opt;
+   int trap = -1;
 
-   while ((opt = getopt(argc, argv, "t:")) != -1) {
+   while ((opt = getopt(argc, argv, "t:x:")) != -1) {
       switch (opt) {
       case 't':
          if (strcmp(optarg, "-") == 0) {
@@ -405,6 +406,9 @@ initAndResetChip(int argc, char *argv[])
                exit(EXIT_FAILURE);
             }
          }
+         break;
+      case 'x':
+         trap = atoi(optarg);
          break;
       default:
          printf("Usage: %s [-t trace_file]\n", argv[0]);
@@ -421,6 +425,10 @@ initAndResetChip(int argc, char *argv[])
                                  transistors,
                                  vss,
                                  vcc);
+
+   if (trap >= 0) {
+      setTrap(state, trap);
+   }
 
    modelChargeSharing(state, YES);
 

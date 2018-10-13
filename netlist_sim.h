@@ -15,4 +15,7 @@ int getNumTransistors(state_t *state);
 void recalcNodeList(state_t *state);
 void stabilizeChip(state_t *state);
 
+void setTrap(state_t *state, transnum_t tn);
+
 void modelChargeSharing(state_t *state, BOOL enabled);
+
