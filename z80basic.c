@@ -119,9 +119,10 @@ int main(int argc, char *argv[]) {
       if (isFetchCycle(state, 0xfff1)) {
          char *command = readline(NULL);
          if (command == NULL) {
-            printf("Run out of commands, exiting\n");
+            printf("Run out of commands at cycle %d, exiting\n", cycle);
             //dump_memory();
             shutdownChip(state);
+            dump_memory();
             exit(0);
          }
          // Copy the command to the input buffer

@@ -29,6 +29,7 @@
 #include "netlist_sim.h"
 /* nodes & transistors */
 #include "netlist_z80.h"
+#include "perfectz80.h"
 
 /************************************************************
  *
@@ -366,7 +367,9 @@ handleMemory(void *state)
  *
  ************************************************************/
 
-static unsigned int cycle;
+int cycle = 0;
+
+static int num_cycles = -1;
 
 void
 step(void *state)
@@ -382,6 +385,13 @@ step(void *state)
       handleMemory(state);
 
    cycle++;
+
+   if (cycle == num_cycles) {
+      printf("Max simulation cycles reached: %d, exiting\n", cycle);
+      shutdownChip(state);
+      dump_memory();
+      exit(0);
+   }
 }
 
 void *
@@ -394,7 +404,7 @@ initAndResetChip(int argc, char *argv[])
    int opt;
    int trap = -1;
 
-   while ((opt = getopt(argc, argv, "t:x:")) != -1) {
+   while ((opt = getopt(argc, argv, "t:x:n:")) != -1) {
       switch (opt) {
       case 't':
          if (strcmp(optarg, "-") == 0) {
@@ -409,6 +419,9 @@ initAndResetChip(int argc, char *argv[])
          break;
       case 'x':
          trap = atoi(optarg);
+         break;
+      case 'n':
+         num_cycles = atoi(optarg);
          break;
       default:
          printf("Usage: %s [-t trace_file]\n", argv[0]);
