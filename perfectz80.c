@@ -39,6 +39,26 @@
 
 FILE *trace_file;
 
+int intAckData = 0xE9;
+
+int dump = 0;
+
+typedef struct {
+   nodenum_t node;   // Signal node number
+   const char *name; // Signal name
+   int period;       // Assert evern <period> half-cycles
+   int min;          // Min duration
+   int max;          // Max diration
+   int active;       // Counter to track activity
+} signal_type;
+
+static signal_type auto_signals[] = {
+   { _wait, "WAIT", 0, 1, 10, 0},
+   {  _int,  "INT", 0, 1, 10, 0},
+   {  _nmi,  "NMI", 0, 1, 10, 0}
+};
+
+
 uint16_t
 readAddressBus(void *state)
 {
@@ -349,7 +369,7 @@ handleMemory(void *state)
 
    // Interrupt Ack
    if (!iorq && !m1) {
-      writeDataBus(state, 0xE9);
+      writeDataBus(state, intAckData);
    }
 
    // Output same for analysis with Z80Decoder
@@ -369,12 +389,30 @@ handleMemory(void *state)
 
 int cycle = 0;
 
-static int num_cycles = -1;
+static int max_cycles = -1;
 
 void
 step(void *state)
 {
    BOOL clock = isNodeHigh(state, clk);
+
+   /* auto signals */
+   for (int i = 0; i < sizeof(auto_signals) / sizeof(signal_type); i++) {
+      signal_type *signal = &auto_signals[i];
+      if (signal->period > 0) {
+         if (signal->active) {
+            signal->active--;
+            if (!signal->active) {
+               // De-assert the signal
+               setNode(state, signal->node,  1);
+            }
+         } else if (!(cycle % signal->period)) {
+            // Assert the signal
+            setNode(state, signal->node,  0);
+            signal->active = signal->min + cycle % (1 + signal->max - signal->min);
+         }
+      }
+   }
 
    /* invert clock */
    setNode(state, clk, !clock);
@@ -386,12 +424,42 @@ step(void *state)
 
    cycle++;
 
-   if (cycle == num_cycles) {
+   if (cycle == max_cycles) {
       printf("Max simulation cycles reached: %d, exiting\n", cycle);
       shutdownChip(state);
-      dump_memory();
       exit(0);
    }
+}
+
+
+void
+parseAutoArg(nodenum_t node, char *optarg) {
+   char *param;
+   for (int i = 0; i < sizeof(auto_signals) / sizeof(signal_type); i++) {
+      signal_type *signal = &auto_signals[i];
+      if (signal->node == node) {
+         signal->period = 1000;
+         signal->min = 10;
+         signal->max = 16;
+         param = strtok(optarg, ",");
+         if (param) {
+            signal->period = atoi(param);
+         }
+         param = strtok(NULL, ",");
+         if (param) {
+            signal->min = atoi(param);
+         }
+         param = strtok(NULL, ",");
+         if (param) {
+            signal->max = atoi(param);
+         }
+         printf("%s (node %d): period %d; min %d; max %d\n",
+                signal->name, signal->node, signal->period, signal->min, signal->max);
+         return;
+      }
+   }
+   printf("Failed to find auto_signal[] entry for %d\n", node);
+   exit(1);
 }
 
 void *
@@ -404,7 +472,7 @@ initAndResetChip(int argc, char *argv[])
    int opt;
    int trap = -1;
 
-   while ((opt = getopt(argc, argv, "t:x:n:")) != -1) {
+   while ((opt = getopt(argc, argv, "t:x:m:i:n:w:d")) != -1) {
       switch (opt) {
       case 't':
          if (strcmp(optarg, "-") == 0) {
@@ -420,8 +488,20 @@ initAndResetChip(int argc, char *argv[])
       case 'x':
          trap = atoi(optarg);
          break;
+      case 'm':
+         max_cycles = atoi(optarg);
+         break;
+      case 'i':
+         parseAutoArg(_int, optarg);
+         break;
       case 'n':
-         num_cycles = atoi(optarg);
+         parseAutoArg(_nmi, optarg);
+         break;
+      case 'w':
+         parseAutoArg(_wait, optarg);
+         break;
+      case 'd':
+         dump = 1;
          break;
       default:
          printf("Usage: %s [-t trace_file]\n", argv[0]);
@@ -471,13 +551,20 @@ void setInt(state_t *state, int value) {
    setNode(state, _int,  value);
 }
 
+void setIntAckData(state_t *state, int value) {
+   intAckData = value;
+}
+
 int isFetchCycle(void *state, unsigned int addr) {
    static BOOL prev_condition = 0;
    uint16_t a = readAddressBus(state);
    BOOL m1    = isNodeHigh(state, _m1);
    BOOL rd    = isNodeHigh(state, _rd);
    BOOL mreq  = isNodeHigh(state, _mreq);
-   BOOL condition = !m1 && !mreq && !rd && (a == addr);
+   BOOL nmi   = isNodeHigh(state, _nmi);
+   // Including NMI directly is a bit of a bodge
+   // replace with NMI pending FF when we know were this is
+   BOOL condition = nmi && !m1 && !mreq && !rd && (a == addr);
    BOOL result = condition & !prev_condition;
    prev_condition = condition;
    return result;
@@ -486,6 +573,9 @@ int isFetchCycle(void *state, unsigned int addr) {
 void shutdownChip(state_t *state) {
    if (trace_file) {
       fflush(trace_file);
+   }
+   if (dump) {
+      dump_memory();
    }
 }
 

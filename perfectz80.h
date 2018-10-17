@@ -3,6 +3,7 @@
 #endif
 
 extern state_t *initAndResetChip(int argc, char *argv[]);
+extern void setIntAckData(state_t *state, int value);
 extern void setInt(state_t *state, int value);
 extern void shutdownChip(state_t *state);
 extern void step(state_t *state);

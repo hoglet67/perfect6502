@@ -10,14 +10,12 @@
 static void *state = NULL;
 
 static void sigint_handler(int signo) {
-   dump_memory();
+   printf("\nCtrl^C at cycle %d, exiting\n", cycle);
    shutdownChip(state);
    exit(0);
 }
 
 int main(int argc, char *argv[]) {
-
-   int cycle = 0;
 
    if (signal(SIGINT, sigint_handler) == SIG_ERR) {
       fputs("An error occurred while setting a signal handler.\n", stderr);
@@ -47,11 +45,5 @@ int main(int argc, char *argv[]) {
    /* emulate the 6502! */
    for (;;) {
       step(state);
-
-      //if (cycle % 1000000 == 1) {
-      //  chipStatus(state);
-      //}
-
-      cycle++;
-   };
+   }
 }

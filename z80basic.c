@@ -12,7 +12,7 @@
 static void *state = NULL;
 
 static void sigint_handler(int signo) {
-   dump_memory();
+   printf("\nCtrl^C at cycle %d, exiting\n", cycle);
    shutdownChip(state);
    exit(0);
 }
@@ -24,19 +24,41 @@ int main(int argc, char *argv[]) {
       return EXIT_FAILURE;
    }
 
-   int cycle = 0;
-
    state = initAndResetChip(argc, argv);
 
    int ptr = 0;
+
+   setIntAckData(state, 0xF7); // RST 30
 
    // Reset
    memory[ptr++] = 0x31; // LD SP,0xEFFF
    memory[ptr++] = 0xff;
    memory[ptr++] = 0xef;
+   memory[ptr++] = 0x3e; // LD A,0x00
+   memory[ptr++] = 0x00;
+   memory[ptr++] = 0xed; // LD I,A
+   memory[ptr++] = 0x47;
+   memory[ptr++] = 0xed; // IM 0
+   memory[ptr++] = 0x46;
+   memory[ptr++] = 0xfb; // EI
    memory[ptr++] = 0xc3; // JP 0x100
    memory[ptr++] = 0x00;
    memory[ptr++] = 0x01;
+
+   // INT Handler (IM0) - max 8 bytes
+   ptr = 0x0030;
+   memory[ptr++] = 0xfb; // EI
+   memory[ptr++] = 0xfb; // EI
+   memory[ptr++] = 0xED; // RETI
+   memory[ptr++] = 0x4D;
+
+   // NMI Handler
+   ptr = 0x0066;
+   memory[ptr++] = 0xc3; // JP 0x0069 (so decoder detects an NMI)
+   memory[ptr++] = 0x69; //
+   memory[ptr++] = 0x00; //
+   memory[ptr++] = 0xED; // RETN
+   memory[ptr++] = 0x45;
 
    // PAGE = &3B00
    ptr = 0x3B00;
@@ -122,7 +144,6 @@ int main(int argc, char *argv[]) {
             printf("Run out of commands at cycle %d, exiting\n", cycle);
             //dump_memory();
             shutdownChip(state);
-            dump_memory();
             exit(0);
          }
          // Copy the command to the input buffer
@@ -130,11 +151,5 @@ int main(int argc, char *argv[]) {
          // Add a terminator
          *(memory + 0x3800 + strlen(command)) = 13;
       }
-
-      //if (cycle % 1000000 == 1) {
-      //  chipStatus(state);
-      //}
-
-      cycle++;
-   };
+   }
 }
