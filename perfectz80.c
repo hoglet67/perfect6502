@@ -478,7 +478,7 @@ initAndResetChip(int argc, char *argv[])
    int opt;
    int trap = -1;
 
-   while ((opt = getopt(argc, argv, "t:x:m:i:n:w:dc")) != -1) {
+   while ((opt = getopt(argc, argv, "t:x:m:i:n:w:dch")) != -1) {
       switch (opt) {
       case 't':
          if (strcmp(optarg, "-") == 0) {
@@ -512,8 +512,17 @@ initAndResetChip(int argc, char *argv[])
       case 'c':
          check_for_conflicts = 1;
          break;
+      case 'h':
       default:
-         printf("Usage: %s [-t trace_file]\n", argv[0]);
+         printf("Usage: %s [options]\n", argv[0]);
+         printf("  -c                        enable conflict checking\n");
+         printf("  -d                        dump memory on completion\n");
+         printf("  -t <trace file>           generate a bus trace file\n");
+         printf("  -i <period>,<min>,<max>   inject INT interrupts\n");
+         printf("  -n <period>,<min>,<max>   inject NMI interrupts\n");
+         printf("  -w <period>,<min>,<max>   inject wait-states\n");
+         printf("  -m <max half cycles>      limit the length of the simulation\n");
+         printf("  -x <transistor num>       treat transistor as a trap\n");
          exit(EXIT_FAILURE);
       }
    }
