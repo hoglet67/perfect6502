@@ -61,7 +61,9 @@ typedef struct {
 } list_t;
 
 typedef struct {
-   BOOL chargeSharing;
+   BOOL charge_sharing;
+   BOOL check_for_conflicts;
+   int cycle;
    nodenum_t nodes;
    nodenum_t transistors;
    nodenum_t vss;
@@ -320,6 +322,17 @@ addNodeToGroup(state_t *state, nodenum_t n)
     * with the same value - just because they all derive their value from
     * the fact that they are connected to vcc or vss.
     */
+
+   if (state->check_for_conflicts &&
+       ((n == state->vss && state->group_contains_value == contains_vcc) ||
+        (n == state->vcc && state->group_contains_value == contains_vss))) {
+      printf("Cycle: %d, conflict: vcc, vss", state->cycle);
+      for (int i = 0; i < group_count(state); i++) {
+         printf(", %d", group_get(state, i));
+      }
+      printf("\n");
+   }
+
    if (n == state->vss) {
       state->group_contains_value = contains_vss;
       return;
@@ -421,7 +434,7 @@ recalcNode(state_t *state, nodenum_t node)
    addAllNodesToGroup(state, node);
 
    /* get the state of the group */
-   BOOL newv = state->chargeSharing ? getGroupValueChargeSharing(state) : getGroupValue(state);
+   BOOL newv = state->charge_sharing ? getGroupValueChargeSharing(state) : getGroupValue(state);
 
    /*
     * - set all nodes to the group state
@@ -491,7 +504,14 @@ recalcNodeList(state_t *state)
 void
 modelChargeSharing(state_t *state, BOOL enabled)
 {
-   state->chargeSharing = enabled;
+   state->charge_sharing = enabled;
+}
+
+void
+checkForConflicts(state_t *state, BOOL enabled, int cycle)
+{
+   state->check_for_conflicts = enabled;
+   state->cycle = cycle;
 }
 
 static inline void
@@ -523,7 +543,8 @@ setupNodesAndTransistors(netlist_transdefs *transdefs, BOOL *node_is_pullup, nod
 {
    /* allocate state */
    state_t *state = malloc(sizeof(state_t));
-   state->chargeSharing = NO;
+   state->charge_sharing = NO;
+   state->check_for_conflicts = NO;
    state->nodes = nodes;
    state->transistors = transistors;
    state->trap = 0xFFFF;

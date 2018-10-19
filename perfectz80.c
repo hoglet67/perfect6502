@@ -42,6 +42,7 @@ FILE *trace_file;
 int intAckData = 0xE9;
 
 int dump = 0;
+int check_for_conflicts = 0;
 
 typedef struct {
    nodenum_t node;   // Signal node number
@@ -416,7 +417,12 @@ step(void *state)
 
    /* invert clock */
    setNode(state, clk, !clock);
-   recalcNodeList(state);
+
+   if (check_for_conflicts) {
+      checkForConflicts(state, YES, cycle);
+      stabilizeChip(state);
+      checkForConflicts(state, NO, 0);
+   }
 
    /* handle memory reads and writes */
    if (!clock)
@@ -472,7 +478,7 @@ initAndResetChip(int argc, char *argv[])
    int opt;
    int trap = -1;
 
-   while ((opt = getopt(argc, argv, "t:x:m:i:n:w:d")) != -1) {
+   while ((opt = getopt(argc, argv, "t:x:m:i:n:w:dc")) != -1) {
       switch (opt) {
       case 't':
          if (strcmp(optarg, "-") == 0) {
@@ -502,6 +508,9 @@ initAndResetChip(int argc, char *argv[])
          break;
       case 'd':
          dump = 1;
+         break;
+      case 'c':
+         check_for_conflicts = 1;
          break;
       default:
          printf("Usage: %s [-t trace_file]\n", argv[0]);
