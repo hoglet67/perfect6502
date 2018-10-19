@@ -493,6 +493,11 @@ initAndResetChip(int argc, char *argv[])
          break;
       case 'x':
          trap = atoi(optarg);
+         printf("Transistor t%d {%d, %d, %d} is now a trap\n",
+                trap,
+                netlist_z80_transdefs[trap].gate,
+                netlist_z80_transdefs[trap].c1,
+                netlist_z80_transdefs[trap].c2);
          break;
       case 'm':
          max_cycles = atoi(optarg);
