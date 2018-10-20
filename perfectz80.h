@@ -17,6 +17,9 @@ extern unsigned char readD(state_t *state);
 extern unsigned char readE(state_t *state);
 extern unsigned char readH(state_t *state);
 extern unsigned char readL(state_t *state);
+extern unsigned char readW(state_t *state);
+extern unsigned char readZ(state_t *state);
+extern unsigned short readWZ(state_t *state);
 extern unsigned short readIX(state_t *state);
 extern unsigned short readIY(state_t *state);
 extern unsigned short readSP(state_t *state);
@@ -37,5 +40,6 @@ extern unsigned int transistors;
 extern int isFetchCycle(void *state, unsigned int addr);
 
 extern void dump_memory();
+extern void dump_registers(state_t *state);
 extern void dump_node_state(state_t *state, int tag);
 extern void dump_transistor_state(state_t *state, int tag);

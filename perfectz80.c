@@ -41,7 +41,8 @@ FILE *trace_file;
 
 int intAckData = 0xE9;
 
-int dump = 0;
+int dump_mem = 0;
+int dump_reg = 0;
 int check_for_conflicts = 0;
 
 typedef struct {
@@ -221,6 +222,19 @@ readL(void *state)
 }
 
 uint8_t
+readW(void *state)
+{
+   return readNodes(state, 8, (nodenum_t[]){ reg_w0,reg_w1,reg_w2,reg_w3,reg_w4,reg_w5,reg_w6,reg_w7 });
+}
+
+uint8_t
+readZ(void *state)
+{
+   return readNodes(state, 8, (nodenum_t[]){ reg_z0,reg_z1,reg_z2,reg_z3,reg_z4,reg_z5,reg_z6,reg_z7 });
+}
+
+
+uint8_t
 readIXL(void *state)
 {
    return readNodes(state, 8, (nodenum_t[]){ reg_ixl0,reg_ixl1,reg_ixl2,reg_ixl3,reg_ixl4,reg_ixl5,reg_ixl6,reg_ixl7 });
@@ -269,6 +283,12 @@ readPCH(void *state)
    return readNodes(state, 8, (nodenum_t[]){ reg_pch0,reg_pch1,reg_pch2,reg_pch3,reg_pch4,reg_pch5,reg_pch6,reg_pch7 });
 }
 
+
+uint16_t
+readWZ(void *state)
+{
+   return (readW(state) << 8) | readZ(state);
+}
 
 uint16_t
 readIX(void *state)
@@ -478,7 +498,7 @@ initAndResetChip(int argc, char *argv[])
    int opt;
    int trap = -1;
 
-   while ((opt = getopt(argc, argv, "t:x:m:i:n:w:dch")) != -1) {
+   while ((opt = getopt(argc, argv, "t:x:m:i:n:w:drch")) != -1) {
       switch (opt) {
       case 't':
          if (strcmp(optarg, "-") == 0) {
@@ -512,7 +532,10 @@ initAndResetChip(int argc, char *argv[])
          parseAutoArg(_wait, optarg);
          break;
       case 'd':
-         dump = 1;
+         dump_mem = 1;
+         break;
+      case 'r':
+         dump_reg = 1;
          break;
       case 'c':
          check_for_conflicts = 1;
@@ -522,6 +545,7 @@ initAndResetChip(int argc, char *argv[])
          printf("Usage: %s [options]\n", argv[0]);
          printf("  -c                        enable conflict checking\n");
          printf("  -d                        dump memory on completion\n");
+         printf("  -r                        dump registers on completion\n");
          printf("  -t <trace file>           generate a bus trace file\n");
          printf("  -i <period>,<min>,<max>   inject INT interrupts\n");
          printf("  -n <period>,<min>,<max>   inject NMI interrupts\n");
@@ -597,8 +621,11 @@ void shutdownChip(state_t *state) {
    if (trace_file) {
       fflush(trace_file);
    }
-   if (dump) {
+   if (dump_mem) {
       dump_memory();
+   }
+   if (dump_reg) {
+      dump_registers(state);
    }
 }
 
@@ -672,6 +699,23 @@ void dump_memory() {
    }
    printf("\n");
 }
+
+void dump_registers(state_t *state) {
+   printf("register  A = %02x\n", readA(state));
+   printf("register  F = %02x\n", readF(state));
+   printf("register  B = %02x\n", readB(state));
+   printf("register  C = %02x\n", readC(state));
+   printf("register  D = %02x\n", readD(state));
+   printf("register  E = %02x\n", readE(state));
+   printf("register  H = %02x\n", readH(state));
+   printf("register  L = %02x\n", readL(state));
+   printf("register IX = %04x\n", readIX(state));
+   printf("register IY = %04x\n", readIY(state));
+   printf("register WZ = %04x\n", readWZ(state));
+   printf("register SP = %04x\n", readSP(state));
+   printf("register PC = %04x\n", readPC(state));
+}
+
 
 void dump_node_state(state_t *state, int tag) {
    for (int i = 0; i < getNumNodes(state); i++) {
