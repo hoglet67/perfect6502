@@ -513,7 +513,7 @@ initAndResetChip(int argc, char *argv[])
          break;
       case 'x':
          trap = atoi(optarg);
-         printf("Transistor t%d {%d, %d, %d} is now a trap\n",
+         printf("## Transistor t%d {%d, %d, %d} is now a trap\n",
                 trap,
                 netlist_z80_transdefs[trap].gate,
                 netlist_z80_transdefs[trap].c1,
@@ -714,6 +714,8 @@ void dump_registers(state_t *state) {
    printf("register WZ = %04x\n", readWZ(state));
    printf("register SP = %04x\n", readSP(state));
    printf("register PC = %04x\n", readPC(state));
+   printf("register IFF1 = %d\n", isNodeHigh(state, 1210));
+   printf("register IFF2 = %d\n", isNodeHigh(state, 1239));
 }
 
 

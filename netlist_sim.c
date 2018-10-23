@@ -89,6 +89,9 @@ typedef struct {
    nodenum_t *transistors_c2;
    bitmap_t *transistors_on;
 
+   /* Map original transistor number to new number after duplicates removed */
+   nodenum_t *transistors_num_map;
+
    /* the nodes we are working with */
    nodenum_t *list1;
    list_t listin;
@@ -535,7 +538,10 @@ add_nodes_left_dependant(state_t *state, nodenum_t a, nodenum_t b)
 }
 
 void setTrap(state_t *state, transnum_t tn) {
-   state->trap = tn;
+   /* Map original transistor number to new number after duplicates removed */
+   int trap = state->transistors_num_map[tn];
+   state->trap = trap;
+   set_transistors_on(state, trap, YES);
 }
 
 state_t *
@@ -577,6 +583,7 @@ setupNodesAndTransistors(netlist_transdefs *transdefs, BOOL *node_is_pullup, nod
    state->transistors_c1 = calloc(state->transistors, sizeof(*state->transistors_c1));
    state->transistors_c2 = calloc(state->transistors, sizeof(*state->transistors_c2));
    state->transistors_on = calloc(WORDS_FOR_BITS(state->transistors), sizeof(*state->transistors_on));
+   state->transistors_num_map = calloc(state->transistors, sizeof(*state->transistors_num_map));
    state->list1 = calloc(state->nodes, sizeof(*state->list1));
    state->list2 = calloc(state->nodes, sizeof(*state->list2));
    state->listout_bitmap = calloc(WORDS_FOR_BITS(state->nodes), sizeof(*state->listout_bitmap));
@@ -611,6 +618,7 @@ setupNodesAndTransistors(netlist_transdefs *transdefs, BOOL *node_is_pullup, nod
             found = YES;
          }
       }
+      state->transistors_num_map[i] = j;
       if (!found) {
          state->transistors_gate[j] = gate;
          state->transistors_c1[j] = c1;
