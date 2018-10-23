@@ -8,6 +8,7 @@ OBJS_Z80_FULL=$(OBJS_Z80) z80full.o
 OBJS_Z80_DOC=$(OBJS_Z80) z80doc.o
 OBJS_Z80_INTERRUPT=$(OBJS_Z80) z80interrupt.o
 OBJS_Z80_TRAP1=$(OBJS_Z80) z80trap1.o
+OBJS_Z80_NASCOM=$(OBJS_Z80) z80nascom.o
 
 #OBJS+=measure.o
 
@@ -16,7 +17,7 @@ OBJS_Z80_TRAP1=$(OBJS_Z80) z80trap1.o
 
 CFLAGS=-Wall -O3
 
-all: z80basic z80full z80doc z80interrupt z80trap1 cbmbasic
+all: z80basic z80full z80doc z80interrupt z80trap1 z80nascom cbmbasic
 
 cbmbasic: $(OBJS_6502)
 	$(CC) -o cbmbasic $(OBJS_6502)
@@ -36,6 +37,9 @@ z80interrupt: $(OBJS_Z80_INTERRUPT)
 z80trap1: $(OBJS_Z80_TRAP1)
 	$(CC) -o z80trap1 $(OBJS_Z80_TRAP1)
 
+z80nascom: $(OBJS_Z80_NASCOM)
+	$(CC) -o z80nascom $(OBJS_Z80_NASCOM)
+
 clean:
-	rm -f $(OBJS_Z80_FULL) $(OBJS_Z80_DOC) $(OBJS_Z80_BASIC) $(OBJS_Z80_INTERRUPT) $(OBJS_Z80_TRAP1)  $(OBJS_6502)  z80full z80doc z80basic z80interrupt z80trap1 cbmbasic
+	rm -f $(OBJS_Z80_FULL) $(OBJS_Z80_DOC) $(OBJS_Z80_BASIC) $(OBJS_Z80_INTERRUPT) $(OBJS_Z80_TRAP1) $(OBJS_Z80_NASCOM) $(OBJS_6502)  z80full z80doc z80basic z80interrupt z80trap1 z80nascom cbmbasic
 

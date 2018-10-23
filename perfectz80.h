@@ -5,6 +5,9 @@
 extern state_t *initAndResetChip(int argc, char *argv[]);
 extern void setIntAckData(state_t *state, int value);
 extern void setInt(state_t *state, int value);
+extern void setUart(state_t *data, int control_addr, int data_addr);
+extern void setUartRxChar(state_t *data, int c);
+extern int  getUartRxChar(state_t *data);
 extern void shutdownChip(state_t *state);
 extern void step(state_t *state);
 extern void chipStatus(state_t *state);

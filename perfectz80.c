@@ -45,6 +45,10 @@ int dump_mem = 0;
 int dump_reg = 0;
 int check_for_conflicts = 0;
 
+int uart_control = -1;    // IO address of UART control/status register
+int uart_data    = 0xAB;  // IO address of UART data register
+int uart_rx_char = -1;    // Character about to be received
+
 typedef struct {
    nodenum_t node;   // Signal node number
    const char *name; // Signal name
@@ -342,6 +346,7 @@ handleMemory(void *state)
    int iorq = isNodeHigh(state, _iorq);
    int rd = isNodeHigh(state, _rd);
    int wr = isNodeHigh(state, _wr);
+   static int last_rd = 1;
    static int last_wr = 1;
 
    // Memory Read
@@ -355,8 +360,24 @@ handleMemory(void *state)
    }
 
    // IO Read
-   if (!iorq && !rd) {
-      writeDataBus(state, 0xBF);
+   if (!iorq && !rd && last_rd) {
+      int a = readAddressBus(state) & 0xff;
+      if (a == uart_control) {
+         if (uart_rx_char >= 0) {
+            writeDataBus(state, 0x83);
+         } else {
+            writeDataBus(state, 0x82);
+         }
+      } else if (a == uart_data) {
+         if (uart_rx_char >= 0) {
+            writeDataBus(state, uart_rx_char);
+            uart_rx_char = -1;
+         } else {
+            writeDataBus(state, 0x00);
+         }
+      } else {
+         writeDataBus(state, 0xBF);
+      }
    }
 
    // IO Write (falling edge only)
@@ -377,8 +398,10 @@ handleMemory(void *state)
             printf("%c", d);
          }
          fflush(stdout);
-      } else if (a == 0xab) {
-         // Acorn output
+      } else if (a == uart_control) {
+         // UART control (ignore)
+      } else if (a == uart_data) {
+         // UART data
          printf("%c", d);
          fflush(stdout);
       } else if (a == 0xfe) {
@@ -399,6 +422,7 @@ handleMemory(void *state)
       putc(m1 | (rd << 1) | (wr << 2) | (mreq << 3) | (iorq << 4) | 0xE0, trace_file);
    }
 
+   last_rd = rd;
    last_wr = wr;
 }
 
@@ -600,6 +624,19 @@ void setInt(state_t *state, int value) {
 
 void setIntAckData(state_t *state, int value) {
    intAckData = value;
+}
+
+void setUart(state_t *data, int control_addr, int data_addr) {
+   uart_control = control_addr;
+   uart_data = data_addr;
+}
+
+void setUartRxChar(state_t *data, int c) {
+   uart_rx_char = c;
+}
+
+int getUartRxChar(state_t *data) {
+   return uart_rx_char;
 }
 
 int isFetchCycle(void *state, unsigned int addr) {
