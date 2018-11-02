@@ -1,7 +1,7 @@
 OBJS_6502=perfect6502.o netlist_sim.o
 OBJS_6502+=cbmbasic.o runtime.o runtime_init.o plugin.o console.o emu.o
 
-OBJS_Z80=perfectz80.o netlist_sim.o
+OBJS_Z80=perfectz80.o netlist_sim.o tube.o
 
 OBJS_Z80_BASIC=$(OBJS_Z80) z80basic.o
 OBJS_Z80_FULL=$(OBJS_Z80) z80full.o
@@ -9,6 +9,7 @@ OBJS_Z80_DOC=$(OBJS_Z80) z80doc.o
 OBJS_Z80_INTERRUPT=$(OBJS_Z80) z80interrupt.o
 OBJS_Z80_TRAP1=$(OBJS_Z80) z80trap1.o
 OBJS_Z80_NASCOM=$(OBJS_Z80) z80nascom.o
+OBJS_Z80_CPM=$(OBJS_Z80) z80cpm.o
 
 #OBJS+=measure.o
 
@@ -17,7 +18,7 @@ OBJS_Z80_NASCOM=$(OBJS_Z80) z80nascom.o
 
 CFLAGS=-Wall -O3
 
-all: z80basic z80full z80doc z80interrupt z80trap1 z80nascom cbmbasic
+all: z80basic z80full z80doc z80interrupt z80trap1 z80nascom z80cpm cbmbasic
 
 cbmbasic: $(OBJS_6502)
 	$(CC) -o cbmbasic $(OBJS_6502)
@@ -40,6 +41,9 @@ z80trap1: $(OBJS_Z80_TRAP1)
 z80nascom: $(OBJS_Z80_NASCOM)
 	$(CC) -o z80nascom $(OBJS_Z80_NASCOM)
 
+z80cpm: $(OBJS_Z80_CPM)
+	$(CC) -o z80cpm $(OBJS_Z80_CPM)
+
 clean:
-	rm -f $(OBJS_Z80_FULL) $(OBJS_Z80_DOC) $(OBJS_Z80_BASIC) $(OBJS_Z80_INTERRUPT) $(OBJS_Z80_TRAP1) $(OBJS_Z80_NASCOM) $(OBJS_6502)  z80full z80doc z80basic z80interrupt z80trap1 z80nascom cbmbasic
+	rm -f $(OBJS_Z80_FULL) $(OBJS_Z80_DOC) $(OBJS_Z80_BASIC) $(OBJS_Z80_INTERRUPT) $(OBJS_Z80_TRAP1) $(OBJS_Z80_NASCOM) $(OBJS_Z80_CPM) $(OBJS_6502)  z80full z80doc z80basic z80interrupt z80trap1 z80nascom z80cpm cbmbasic
 

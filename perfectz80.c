@@ -30,6 +30,7 @@
 /* nodes & transistors */
 #include "netlist_z80.h"
 #include "perfectz80.h"
+#include "tube.h"
 
 /************************************************************
  *
@@ -48,6 +49,8 @@ int check_for_conflicts = 0;
 int uart_control = -1;    // IO address of UART control/status register
 int uart_data    = 0xAB;  // IO address of UART data register
 int uart_rx_char = -1;    // Character about to be received
+
+int tube = 0;
 
 typedef struct {
    nodenum_t node;   // Signal node number
@@ -346,23 +349,52 @@ handleMemory(void *state)
    int iorq = isNodeHigh(state, _iorq);
    int rd = isNodeHigh(state, _rd);
    int wr = isNodeHigh(state, _wr);
+   int addr = readAddressBus(state);
    static int last_rd = 1;
    static int last_wr = 1;
+   static int force_rom = 0;
+
+   // Emulate the NMI/ROM switching behaviour of the Acorn Tube
+   if (tube & !mreq & !m1) {
+      if (addr == 0x0066) {
+         force_rom = 1;
+      } else if (addr & 0x8000) {
+         force_rom = 0;
+      }
+   }
 
    // Memory Read
    if (!mreq && !rd) {
-      writeDataBus(state, mRead(readAddressBus(state)));
+      if (force_rom) {
+         switch (addr) {
+         case 0x0066:
+            writeDataBus(state, 0xC3);
+            break;
+         case 0x0067:
+            writeDataBus(state, 0x61);
+            break;
+         case 0x0068:
+            writeDataBus(state, 0xFC);
+            break;
+         default:
+            writeDataBus(state, 0x76);
+         }
+      } else {
+         writeDataBus(state, mRead(addr));
+      }
    }
 
    // Memory Write
    if (!mreq && !wr) {
-      mWrite(readAddressBus(state), readDataBus(state));
+      mWrite(addr, readDataBus(state));
    }
 
    // IO Read
    if (!iorq && !rd && last_rd) {
-      int a = readAddressBus(state) & 0xff;
-      if (a == uart_control) {
+      int a = addr & 0xff;
+      if (tube) {
+         writeDataBus(state, tube_read(a & 7));
+      } else if (a == uart_control) {
          if (uart_rx_char >= 0) {
             writeDataBus(state, 0x83);
          } else {
@@ -382,9 +414,11 @@ handleMemory(void *state)
 
    // IO Write (falling edge only)
    if (!iorq && !wr && last_wr) {
-      int a = readAddressBus(state) & 0xff;
+      int a = addr & 0xff;
       int d = readDataBus(state);
-      if (a == 0xAA) {
+      if (tube) {
+         tube_write(a & 7, d);
+      } else if (a == 0xAA) {
          // Spectrum Output
          if (d < 32) {
             if (d == 13) {
@@ -622,6 +656,10 @@ void setInt(state_t *state, int value) {
    setNode(state, _int,  value);
 }
 
+void setNmi(state_t *state, int value) {
+   setNode(state, _nmi,  value);
+}
+
 void setIntAckData(state_t *state, int value) {
    intAckData = value;
 }
@@ -637,6 +675,10 @@ void setUartRxChar(state_t *data, int c) {
 
 int getUartRxChar(state_t *data) {
    return uart_rx_char;
+}
+
+void setTube(state_t *state, int value) {
+   tube = value;
 }
 
 int isFetchCycle(void *state, unsigned int addr) {
