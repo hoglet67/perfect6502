@@ -338,7 +338,7 @@ void do_oswrch(uint8_t a) {
    // Nasty hack: at the A> propmt, make the next line of input available
    char **terminator = osrdch_terminators;
    while (*terminator) {
-      if (last_a == *terminator[0] && a == *terminator[1]) {
+      if (last_a == (*terminator)[0] && a == (*terminator)[1]) {
          osrdch_input_ptr = osrdch_input[osrdch_input_line++];
          if (osrdch_input_ptr == NULL) {
             printf("OSRDCH ran out of input, exiting\n");
