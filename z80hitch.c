@@ -62,7 +62,7 @@ static char *osrdch_commands[] = {
 // Prompt to look for that preceeds feeding next osrdch_command
 static char *osrdch_prompts[] = {
    "A>",
-   "\n<",
+   "\n>",
    NULL
 };
 
