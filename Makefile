@@ -10,6 +10,7 @@ OBJS_Z80_INTERRUPT=$(OBJS_Z80) z80interrupt.o
 OBJS_Z80_TRAP1=$(OBJS_Z80) z80trap1.o
 OBJS_Z80_NASCOM=$(OBJS_Z80) z80nascom.o
 OBJS_Z80_CPM=$(OBJS_Z80) z80cpm.o
+OBJS_Z80_HITCH=$(OBJS_Z80) z80hitch.o
 
 #OBJS+=measure.o
 
@@ -18,7 +19,7 @@ OBJS_Z80_CPM=$(OBJS_Z80) z80cpm.o
 
 CFLAGS=-Wall -O3
 
-all: z80basic z80full z80doc z80interrupt z80trap1 z80nascom z80cpm cbmbasic
+all: z80basic z80full z80doc z80interrupt z80trap1 z80nascom z80cpm z80hitch cbmbasic
 
 cbmbasic: $(OBJS_6502)
 	$(CC) -o cbmbasic $(OBJS_6502)
@@ -44,6 +45,9 @@ z80nascom: $(OBJS_Z80_NASCOM)
 z80cpm: $(OBJS_Z80_CPM)
 	$(CC) -o z80cpm $(OBJS_Z80_CPM)
 
+z80hitch: $(OBJS_Z80_HITCH)
+	$(CC) -o z80hitch $(OBJS_Z80_HITCH)
+
 clean:
-	rm -f $(OBJS_Z80_FULL) $(OBJS_Z80_DOC) $(OBJS_Z80_BASIC) $(OBJS_Z80_INTERRUPT) $(OBJS_Z80_TRAP1) $(OBJS_Z80_NASCOM) $(OBJS_Z80_CPM) $(OBJS_6502)  z80full z80doc z80basic z80interrupt z80trap1 z80nascom z80cpm cbmbasic
+	rm -f $(OBJS_Z80_FULL) $(OBJS_Z80_DOC) $(OBJS_Z80_BASIC) $(OBJS_Z80_INTERRUPT) $(OBJS_Z80_TRAP1) $(OBJS_Z80_NASCOM) $(OBJS_Z80_CPM) $(OBJS_Z80_HITCH) $(OBJS_6502)  z80full z80doc z80basic z80interrupt z80trap1 z80nascom z80cpm z80hitch cbmbasic
 

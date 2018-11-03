@@ -9,32 +9,67 @@
 
 #include "tube.h"
 #include "z80clientrom.h"
-#include "z80cpmdisk.h"
+#include "z80hitchdisk.h"
 
 static void *state = NULL;
 
 // Commands to be fed to OSRDCH
 // (must be terminated with \r)
 static char *osrdch_commands[] = {
-   "DIR *.BBC\r",
-   "STAT SORT.BBC\r",
-   "BBCBASIC\r",
+   "HITCH2\r",
+   "TURN LIGHT ON\r",
+   "GET UP\r",
+   "GET GOWN\r",
+   "WEAR GOWN\r",
+   "LOOK IN POCKET\r",
+   "GET ANALGESIC\r",
+   "GET SCREWDRIVER AND TOOTHBRUSH\r",
+   "S\r",
+   "GET MAIL\r",
+   "READ MAIL\r",
+   "S\r",
+   "LIE DOWN\r",
+   "WAIT\r",
+   "WAIT\r",
+   "WAIT\r",
+   "FORD, WHAT ABOUT MY HOME?\r",
+   "WAIT\r",
+   "WAIT\r",
+   "S\r",
+   "W\r",
+   "DRINK BEER\r",
+   "AGAIN\r",
+   "AGAIN\r",
+   "EXAMINE SHELF\r",
+   "PAY FOR SANDWICH\r",
+   "E\r",
+   "FEED DOG\r",
+   "WAIT\r",
+   "WAIT\r",
+   "WAIT\r",
+   "WAIT\r",
+   "WAIT\r",
+   "WAIT\r",
+   "WAIT\r",
+   "WAIT\r",
+   "EXAMINE SHIP\r",
+   "GET DEVICE\r",
+   "EXAMINE DEVICE\r",
+   "PRESS GREEN\r",
    NULL
 };
 
 // Prompt to look for that preceeds feeding next osrdch_command
 static char *osrdch_prompts[] = {
    "A>",
+   "\n<",
    NULL
 };
 
 // Commands to be fed to OWORD0
 // (must be terminated with \r)
 static char *osword0_commands[] = {
-   "HELP MON\r",
    "CPM\r",
-   "LOAD \"SORT\"\r",
-   "RUN\r",
    NULL
 };
 
@@ -63,7 +98,8 @@ int main(int argc, char *argv[]) {
    }
 
    // Reset the tube emulation
-   tube_reset(state, z80cpmdisk_bin, osword0_commands, osrdch_commands, osrdch_prompts);
+   // Reset the tube emulation
+   tube_reset(state, z80hitchdisk_bin, osword0_commands, osrdch_commands, osrdch_prompts);
 
    /* emulate the 6MHz Z80! */
    for (;;) {

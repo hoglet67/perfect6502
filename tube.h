@@ -2,7 +2,7 @@
 
 #include "perfectz80.h"
 
-extern void tube_reset(state_t *state, char *osword0_commands[], char *osrdch_commands[]);
+extern void tube_reset(state_t *state, uint8_t *disk, char *osword0_commands[], char *osrdch_commands[], char *osrdch_prompts[]);
 
 extern void tube_clock(state_t *state);
 

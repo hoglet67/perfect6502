@@ -4,7 +4,6 @@
 #include <string.h>
 
 #include "tube.h"
-#include "z80cpmdisk.h"
 
 static uint8_t host_memory[0x10000];
 
@@ -60,9 +59,12 @@ int      transfer_len = 0;
 int      delayed_response_len = 0;
 uint8_t  delayed_response_data[256];
 
+static uint8_t *z80disk_bin;
+
 static char *osrdch_input_ptr = NULL;
 static int osrdch_input_line = 0;
 static char **osrdch_input;
+static char **osrdch_terminators;
 
 static int osword0_input_line = 0;
 static char **osword0_input;
@@ -116,13 +118,15 @@ uint8_t fifo_read(fifo_type *fifo) {
    return data;
 }
 
-void tube_reset(state_t *state, char *osword0_commands[], char *osrdch_commands[]) {
+void tube_reset(state_t *state, uint8_t *disk, char *osword0_commands[], char *osrdch_commands[], char *osrdch_prompts[]) {
    // Save the arguments
    sim_state = state;
+   z80disk_bin = disk;
    osword0_input = osword0_commands;
    osword0_input_line = 0;
    osrdch_input = osrdch_commands;
    osrdch_input_line = 0;
+   osrdch_terminators = osrdch_prompts;
    // So we see output quickly if piping into tee
    setlinebuf(stdout);
    tube_cycles = 0;
@@ -235,7 +239,7 @@ void do_osword(uint8_t a, uint8_t *block, int in_length, int out_length) {
          offset = size * (((drive & 2) ? 10 : 0) + (track * 20) + sector);
          length = size * count;
          // Generate the response
-         if (offset + length < z80cpmdisk_bin_len) {
+         if (offset + length < (400 * 1024)) {
 
             // Pre-generate a success response
             block[in_length - 7 - nparams] = 0x00;
@@ -245,7 +249,7 @@ void do_osword(uint8_t a, uint8_t *block, int in_length, int out_length) {
                if ((length + address) >= 0x10000) {
                   length = 0x10000 - address;
                }
-               memcpy(host_memory + (address & 0xffff), z80cpmdisk_bin + offset, length);
+               memcpy(host_memory + (address & 0xffff), z80disk_bin + offset, length);
 
             } else {
 
@@ -253,7 +257,7 @@ void do_osword(uint8_t a, uint8_t *block, int in_length, int out_length) {
                delayed_response_len = out_length;
                memcpy(delayed_response_data, block, out_length);
 
-               initiate_transfer(1, 0xcc, address, z80cpmdisk_bin + offset, length);
+               initiate_transfer(1, 0xcc, address, z80disk_bin + offset, length);
 
                return;
             }
@@ -332,13 +336,18 @@ void do_oswrch(uint8_t a) {
    static int last_a = -1;
    printf("R1: OSWRCH: %c <%02x>\n", (a >= 32 && a < 127) ? a : '.', a);
    // Nasty hack: at the A> propmt, make the next line of input available
-   if (last_a == 'A' && a == '>') {
-      osrdch_input_ptr = osrdch_input[osrdch_input_line++];
-      if (osrdch_input_ptr == NULL) {
-         printf("OSRDCH ran out of input, exiting\n");
-         shutdownChip(sim_state);
-         exit(0);
+   char **terminator = osrdch_terminators;
+   while (*terminator) {
+      if (last_a == *terminator[0] && a == *terminator[1]) {
+         osrdch_input_ptr = osrdch_input[osrdch_input_line++];
+         if (osrdch_input_ptr == NULL) {
+            printf("OSRDCH ran out of input, exiting\n");
+            shutdownChip(sim_state);
+            exit(0);
+         }
+         break;
       }
+      terminator++;
    }
    last_a = a;
 }
