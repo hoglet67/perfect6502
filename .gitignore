@@ -17,3 +17,5 @@ z80trap1
 z80nascom
 z80cpm
 z80hitch
+z80random.h
+z80random

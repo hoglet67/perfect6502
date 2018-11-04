@@ -10,6 +10,7 @@ extern void setUart(state_t *data, int control_addr, int data_addr);
 extern void setUartRxChar(state_t *state, int c);
 extern int  getUartRxChar(state_t *state);
 extern void setTube(state_t *state, int value);
+extern void setRamRange(state_t *state, uint16_t lo, uint16_t hi);
 extern void shutdownChip(state_t *state);
 extern void step(state_t *state);
 extern void chipStatus(state_t *state);
@@ -48,3 +49,5 @@ extern void dump_memory();
 extern void dump_registers(state_t *state);
 extern void dump_node_state(state_t *state, int tag);
 extern void dump_transistor_state(state_t *state, int tag);
+
+extern int get_user_param();

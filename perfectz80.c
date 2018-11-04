@@ -52,6 +52,11 @@ int uart_rx_char = -1;    // Character about to be received
 
 int tube = 0;
 
+uint16_t ram_lo = 0x0000;
+uint16_t ram_hi = 0xffff;
+
+int user_param = 1234;
+
 typedef struct {
    nodenum_t node;   // Signal node number
    const char *name; // Signal name
@@ -67,6 +72,10 @@ static signal_type auto_signals[] = {
    {  _nmi,  "NMI", 0, 1, 10, 0}
 };
 
+
+int get_user_param() {
+   return user_param;
+}
 
 uint16_t
 readAddressBus(void *state)
@@ -338,7 +347,9 @@ mRead(uint16_t a)
 static void
 mWrite(uint16_t a, uint8_t d)
 {
-   memory[a] = d;
+   if (a >= ram_lo && a <= ram_hi) {
+      memory[a] = d;
+   }
 }
 
 static inline void
@@ -556,7 +567,7 @@ initAndResetChip(int argc, char *argv[])
    int opt;
    int trap = -1;
 
-   while ((opt = getopt(argc, argv, "t:x:m:i:n:w:drch")) != -1) {
+   while ((opt = getopt(argc, argv, "t:x:m:i:n:w:drchu:")) != -1) {
       switch (opt) {
       case 't':
          if (strcmp(optarg, "-") == 0) {
@@ -589,6 +600,9 @@ initAndResetChip(int argc, char *argv[])
       case 'w':
          parseAutoArg(_wait, optarg);
          break;
+      case 'u':
+         user_param = atoi(optarg);
+         break;
       case 'd':
          dump_mem = 1;
          break;
@@ -610,6 +624,7 @@ initAndResetChip(int argc, char *argv[])
          printf("  -w <period>,<min>,<max>   inject wait-states\n");
          printf("  -m <max half cycles>      limit the length of the simulation\n");
          printf("  -x <transistor num>       treat transistor as a trap\n");
+         printf("  -u <user param>           app specific param\n");
          exit(EXIT_FAILURE);
       }
    }
@@ -679,6 +694,11 @@ int getUartRxChar(state_t *data) {
 
 void setTube(state_t *state, int value) {
    tube = value;
+}
+
+void setRamRange(state_t *state, uint16_t lo, uint16_t hi) {
+   ram_lo = lo;
+   ram_hi = hi;
 }
 
 int isFetchCycle(void *state, unsigned int addr) {
