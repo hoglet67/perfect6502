@@ -3,6 +3,8 @@
 #include <inttypes.h>
 #include <string.h>
 
+// #define USE_DMA
+
 #include "tube.h"
 
 static uint8_t host_memory[0x10000];
@@ -249,17 +251,23 @@ void do_osword(uint8_t a, uint8_t *block, int in_length, int out_length) {
                if ((length + address) >= 0x10000) {
                   length = 0x10000 - address;
                }
-               memcpy(host_memory + (address & 0xffff), z80disk_bin + offset, length);
+               memcpy(host_memory + address, z80disk_bin + offset, length);
 
             } else {
 
+#ifdef USE_DMA
+               address &= 0xffff;
+               if ((length + address) >= 0x10000) {
+                  length = 0x10000 - address;
+               }
+               memcpy(memory + address, z80disk_bin + offset, length);
+#else
                // setup the delayed response to the OSWORD
                delayed_response_len = out_length;
                memcpy(delayed_response_data, block, out_length);
-
                initiate_transfer(1, 0xcc, address, z80disk_bin + offset, length);
-
                return;
+#endif
             }
 
          } else {
@@ -279,26 +287,48 @@ void do_osword(uint8_t a, uint8_t *block, int in_length, int out_length) {
       uint32_t host_address = block[in_length - 2] | (block[in_length - 3] << 8) | (block[in_length - 4] << 16) | (block[in_length - 5] << 24);
       uint32_t para_address = block[in_length - 6] | (block[in_length - 7] << 8) | (block[in_length - 8] << 16) | (block[in_length - 9] << 24);
 
+      host_address &= 0xffff;
+      para_address &= 0xffff;
+
+#ifdef USE_DMA
+      switch (command) {
+      case 0:
+         // Transfer parasite to host
+         memcpy(host_memory + host_address, memory + para_address, length);
+         break;
+      case 1:
+         // Transfer host to parasite
+         memcpy(memory + para_address, host_memory + host_address, length);
+         break;
+      default:
+         printf("Unsupported OSWORD A=FF command: %02x\n", command);
+      }
+      // Send a single byte response, that is the last byte of the request block (the 0d)
+      fifo_write(&r2, block[in_length]);
+      return;
+#else
       // setup the delayed response to the OSWORD
       delayed_response_len = 1;
       memcpy(delayed_response_data, block + in_length, delayed_response_len);
 
       switch (command) {
       case 0:
-         // Transfer host to parasite
+         // Transfer parasite to host
          initiate_transfer(0, 0xcc, para_address, host_memory + host_address, length);
-         return;
+         break;
       case 1:
          // Transfer host to parasite
          initiate_transfer(1, 0xcc, para_address, host_memory + host_address, length);
-         return;
+         break;
       default:
          printf("Unsupported OSWORD A=FF command: %02x\n", command);
       }
-
+      return;
+#endif
    } else {
       printf("OSWORD A=%02x not implemented\n", a);
    }
+   // Send a default response so things don't deadlock
    for (int i = 0; i < out_length; i++) {
       fifo_write(&r2, block[i]);
    }
