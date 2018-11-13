@@ -461,15 +461,25 @@ handleMemory(void *state)
       writeDataBus(state, intAckData);
    }
 
-   // Output same for analysis with Z80Decoder
-   if (trace_file) {
-      putc(readDataBus(state), trace_file);
-      putc(m1 | (rd << 1) | (wr << 2) | (mreq << 3) | (iorq << 4) | 0xE0, trace_file);
-   }
-
    last_rd = rd;
    last_wr = wr;
 }
+
+static inline void
+handleTrace(void *state)
+{
+   // Output same for analysis with Z80Decoder
+   if (trace_file) {
+      int m1 = isNodeHigh(state, _m1);
+      int mreq = isNodeHigh(state, _mreq);
+      int iorq = isNodeHigh(state, _iorq);
+      int rd = isNodeHigh(state, _rd);
+      int wr = isNodeHigh(state, _wr);
+      putc(readDataBus(state), trace_file);
+      putc(m1 | (rd << 1) | (wr << 2) | (mreq << 3) | (iorq << 4) | 0xE0, trace_file);
+   }
+}
+
 
 /************************************************************
  *
@@ -514,8 +524,11 @@ step(void *state)
    }
 
    /* handle memory reads and writes */
-   if (!clock)
+   if (!clock) {
       handleMemory(state);
+   } else {
+      handleTrace(state);
+   }
 
    cycle++;
 
