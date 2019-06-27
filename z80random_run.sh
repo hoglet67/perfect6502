@@ -18,9 +18,11 @@ do
 
         ./z80random -u $i -t r$n.bin > r$n.out
         ../Z80Decoder/decodez80 -d 0 -a -h -i -s2 -y --cpu nmos_zilog --phi= r$n.bin > r$n.log
-        fail=`grep fail r$n.log | wc -l`
-        warn=`grep -i warn r$n.log | wc -l`
-        echo $i $fail $warn
+        fail=`grep fail <r$n.log | wc -l`
+        warn=`grep -i warn <r$n.log | wc -l`
+        ninstr=`wc -l <r$n.log`
+        naddress=`cut -c1-4 <r$n.log  | sort | uniq | wc -l`
+        echo "Seed: $i Fail: $fail Warn: $warn NInstr: $ninstr NAddress: $naddress"
         if [ "$fail" != "0" ] || [ "$warn" != "2" ]
         then
             exit

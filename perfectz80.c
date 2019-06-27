@@ -42,6 +42,7 @@ FILE *trace_file;
 
 int intAckData = 0xE9;
 
+int trace_addr = 0;
 int dump_mem = 0;
 int dump_reg = 0;
 int check_for_conflicts = 0;
@@ -477,6 +478,11 @@ handleTrace(void *state)
       int wr = isNodeHigh(state, _wr);
       putc(readDataBus(state), trace_file);
       putc(m1 | (rd << 1) | (wr << 2) | (mreq << 3) | (iorq << 4) | 0xE0, trace_file);
+      if (trace_addr) {
+         uint16_t addr = readAddressBus(state);
+         putc(addr & 0xFF, trace_file);
+         putc((addr >> 8) & 0xFF, trace_file);
+      }
    }
 }
 
@@ -580,7 +586,7 @@ initAndResetChip(int argc, char *argv[])
    int opt;
    int trap = -1;
 
-   while ((opt = getopt(argc, argv, "t:x:m:i:n:w:drchu:")) != -1) {
+   while ((opt = getopt(argc, argv, "t:x:m:i:n:w:adrchu:")) != -1) {
       switch (opt) {
       case 't':
          if (strcmp(optarg, "-") == 0) {
@@ -616,6 +622,9 @@ initAndResetChip(int argc, char *argv[])
       case 'u':
          user_param = atoi(optarg);
          break;
+      case 'a':
+         trace_addr = 1;
+         break;
       case 'd':
          dump_mem = 1;
          break;
@@ -632,6 +641,7 @@ initAndResetChip(int argc, char *argv[])
          printf("  -d                        dump memory on completion\n");
          printf("  -r                        dump registers on completion\n");
          printf("  -t <trace file>           generate a bus trace file\n");
+         printf("  -a                        include address in bus trace file\n");         
          printf("  -i <period>,<min>,<max>   inject INT interrupts\n");
          printf("  -n <period>,<min>,<max>   inject NMI interrupts\n");
          printf("  -w <period>,<min>,<max>   inject wait-states\n");
