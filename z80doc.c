@@ -24,10 +24,16 @@ int main(int argc, char *argv[]) {
 
    state = initAndResetChip(argc, argv);
 
-   // On reset JP 0x8000
-   memory[0] = 0xcd;
-   memory[1] = 0x00;
-   memory[2] = 0x80;
+   // On reset
+   memory[0] = 0x00; // NOP
+   memory[1] = 0x00; // NOP
+   memory[2] = 0x00; // NOP
+   memory[3] = 0x31; // LD SP,0xFFFF
+   memory[4] = 0xff;
+   memory[5] = 0xff;
+   memory[6] = 0xc3; // JMP 0x8000
+   memory[7] = 0x00;
+   memory[8] = 0x80;
 
    // RST 10 is character out
    memory[0x10] = 0xD3 ; // OUT (0xAA), A
@@ -41,6 +47,9 @@ int main(int argc, char *argv[]) {
    for (int i = 0; i < sizeof z80doc_out; i++) {
       memory[0x8000 + i] = z80doc_out[i];
    }
+
+      /* Write the memory contents, for FPGA emulation */
+   write_memory_to_file("test.bin");
 
    /* emulate the 6502! */
    for (;;) {
