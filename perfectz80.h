@@ -51,3 +51,5 @@ extern void dump_node_state(state_t *state, int tag);
 extern void dump_transistor_state(state_t *state, int tag);
 
 extern int get_user_param();
+
+extern void write_memory_to_file(char *filename);

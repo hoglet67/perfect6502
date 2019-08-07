@@ -641,7 +641,7 @@ initAndResetChip(int argc, char *argv[])
          printf("  -d                        dump memory on completion\n");
          printf("  -r                        dump registers on completion\n");
          printf("  -t <trace file>           generate a bus trace file\n");
-         printf("  -a                        include address in bus trace file\n");         
+         printf("  -a                        include address in bus trace file\n");
          printf("  -i <period>,<min>,<max>   inject INT interrupts\n");
          printf("  -n <period>,<min>,<max>   inject NMI interrupts\n");
          printf("  -w <period>,<min>,<max>   inject wait-states\n");
@@ -806,6 +806,13 @@ chipStatus(void *state)
    }
 
    printf("\n");
+}
+
+void write_memory_to_file(char *filename) {
+   FILE *fp;
+   fp = fopen(filename, "w+");
+   fwrite(memory, sizeof(memory), 1, fp);
+   fclose(fp);
 }
 
 void dump_memory() {
